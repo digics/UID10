@@ -4,465 +4,466 @@
 #_______________________________________________________________________
 # UID v1.0 ( 2024.10.7 ) ###############################################
 #
-#	by digi_cs 2024
+#     by digi_cs 2024
 #
-#	- library completely "namespaced" ( uid:: )
+#     - library completely "namespaced" ( uid:: )
 #
-#	- dynamic initialization
+#     - dynamic initialization
 #
-#	- unlimited number of characters in uid-generative part
+#     - unlimited number of characters in uid-generative part
 #
-#	- 3 uid-generator modes: independent/remoted/shared
+#     - 3 uid-generator modes: independent/remoted/shared
 #
-#	- 5.7 Muid/sec for i7 2 GHz
+#     - 5.7 Muid/sec for i7 2 GHz
 #
 #_______________________________________________
 #
-#	funcset:
+#     funcset:
 #
-#		uid::get
+#           uid::get
 #
-#		uid::set
-#		uid::setcs
-#		uid::setcnt
+#           uid::set
+#           uid::setcs
+#           uid::setcnt
 #
-#		hid::get
-#		hid::name
+#           hid::get
+#           hid::name
+#           hid::namespace
 #
-#		dump::hid (n/a)
+#           dump::hid (n/a)
 #
 #_________________________________________________________________
-func	envmod::uid( C ) { #########################################
+func  envmod::uid( C ) { #########################################
 
-	# environment registration: uid
-	#
-	#_____________________________
+      # environment registration: uid
+      #
+      #_____________________________
 
 
 }#________________________________________________________________
 ##################################################################
 
-@namespace	 "uid"
+@namespace   "uid"
 
 #_________________________________________________________________
 BEGIN{ ###########################################################
 
-	init0() }
+      init0() }
 
 #_________________________________________________________________
-func	init0(  c ) { ##############################################
+func  init0(  c ) { ##############################################
 
-	if ( ! ( "" in _COUNTPTR ) ) {
+      if ( ! ( "" in _COUNTPTR ) ) {
 
-		_CHARSET[ 0 ][ "" ]
+            _CHARSET[ 0 ][ "" ]
 
-		if ( _ALLCHAR_ == "" )
+            if ( _ALLCHAR_ == "" )
 
-			for ( c = 0; c < 256; c++ )
+                  for ( c = 0; c < 256; c++ )
 
-				_ALLCHAR_ = _ALLCHAR_ sprintf( "%.c", c )
-		#_______________________
+                        _ALLCHAR_ = _ALLCHAR_ sprintf( "%.c", c )
+            #_______________________
 
-		init0_f = 1
+            init0_f = 1
 
-			set( "", "\x7F", "\xC0\xC0\xFF" )
+                  set( "", "\x7F", "\xC0\xC0\xFF" )
 
-			setcs( "hid", "\xFE", "\xC0\xC0\xFE" )
+                  setcs( "hid", "\xFE", "\xC0\xC0\xFE" )
 
-		init0_f = 0
-		#_______________________
+            init0_f = 0
+            #_______________________
 
-		_NAMESPACE_ = "awk" } }
-
-#_________________________________________________________________
-func	get( p ,cp,cs,h,l ) { ######################################
-
-	# generate uid by uid-generator
-	#
-	#	p	- pointer to uid-generator
-	#		  if omitted or == "" - default uid-generator
-	#_____________________________
-
-	if ( ! ( "" in _COUNTPTR ) )
-
-		init0()
-
-	if ( ! ( p in _COUNTPTR ) )
-
-		return get_err( "undefined! uid-generator", p )
-
-	cp = _COUNTPTR[ p ]
-
-	cs = _CHARSETL[ p ]
-	
-	h = _COUNTH[ cp ]
-
-	if ( "" == l = _CHARSET[ cs ][ _COUNTL[ cp ] ] ) {
-		
-		l = _CHARSET[ cs ][ "" ]
-
-		cs = _CHARSETH[ p ]
-
-		if ( "" == h = _CHARSET[ cs ][ h ] ) {
-
-			h = _CHARSET[ cs ][ "" ]
-
-			if ( cp in _NEXT )
-
-				_HIPFX[ cp ] = get_0( _NEXT[ cp ], p, 1 )
-
-			else	return get_err( "out! of uid range", p ) }
-
-		_COUNTH[ cp ] = h }
-
-	_COUNTL[ cp ] = l
-
-	return _PREFIX[ p ] _HIPFX[ cp ] h l _SUFFIX[ p ] }
-
-	#_____________________________
-
-	func	get_0( p, pp, c ,cp,cs,h,l ) {
-
-		cp = _COUNTPTR[ p ]
-
-		cs = _CHARSETL[ p ]
-		
-		h = _COUNTH[ cp ]
-
-		if ( "" == l = _CHARSET[ cs ][ _COUNTL[ cp ] ] ) {
-			
-			l = _CHARSET[ cs ][ "" ]
-
-			cs = _CHARSETH[ p ]
-
-			if ( "" == h = _CHARSET[ cs ][ h ] ) {
-
-				h = _CHARSET[ cs ][ "" ]
-
-				if ( cp in _NEXT )
-
-					_HIPFX[ cp ] = get_0( _NEXT[ cp ], pp, 1 )
-
-				else	return get_err( "chain @2: out! of uid range", pp, c ) }
-
-			_COUNTH[ cp ] = h }
-
-		_COUNTL[ cp ] = l
-
-		return _HIPFX[ cp ] h l }
-	#_____________________________
-
-	func	get_err( t, p, c, p3,p4 ) {
-
-		return fatal( "uid::get( @1 ): " t, p, c, p3,p4 ) }
+            _NAMESPACE_ = "awk" } }
 
 #_________________________________________________________________
-func	set( p, px, sx, l, cs ,s,d,h,ph,c,pc,C ) { #################
+func  get( p ,cp,cs,h,l ) { ######################################
 
-	# setup independent uid-generator
-	#
-	#	p		- pointer to uid-generator
-	#	px		- prefix of uid-generator
-	#	sx		- suffix of uid-generator
-	#	l		- length of generated uid part
-	#	cs		- character set of generated uid part ( []-regexp )
-	#_____________________________
+      # generate uid by uid-generator
+      #
+      #     p     - pointer to uid-generator
+      #             if omitted or == "" - default uid-generator
+      #_____________________________
 
-	if ( init0_f ) {
+      if ( ! ( "" in _COUNTPTR ) )
 
-		if ( p == "" && l > 4 )
+            init0()
 
-			return set_err( "default uid-generator: length > 4 is not allowed!", p ) }
+      if ( ! ( p in _COUNTPTR ) )
 
-	else {
+            return get_err( "undefined! uid-generator", p )
 
-		if ( ! ( "" in _COUNTPTR ) )
+      cp = _COUNTPTR[ p ]
 
-			init0()
+      cs = _CHARSETL[ p ]
+      
+      h = _COUNTH[ cp ]
 
-		if ( p == "" )
+      if ( "" == l = _CHARSET[ cs ][ _COUNTL[ cp ] ] ) {
+            
+            l = _CHARSET[ cs ][ "" ]
 
-			return set_err( "default uid-generator can't be redefined!", p )
+            cs = _CHARSETH[ p ]
 
-		if ( p == "hid" )
+            if ( "" == h = _CHARSET[ cs ][ h ] ) {
 
-			return set_err( "hid-generator can't be redefined!", p ) }
-	#_______________________
+                  h = _CHARSET[ cs ][ "" ]
 
-	if ( l == "" )
+                  if ( cp in _NEXT )
 
-		l = 4
+                        _HIPFX[ cp ] = get_0( _NEXT[ cp ], p, 1 )
 
-	if ( l < 1 )
+                  else  return get_err( "out! of uid range", p ) }
 
-		return set_err( "generative part length! < 1", p )
-	#_________________
+            _COUNTH[ cp ] = h }
 
-	if ( cs == "" )
+      _COUNTL[ cp ] = l
 
-		cs = "\xC0-\xEF"
+      return _PREFIX[ p ] _HIPFX[ cp ] h l _SUFFIX[ p ] }
 
-	if ( ! awk::patsplit( _ALLCHAR_, C, "[" cs "]" ) )
+      #_____________________________
 
-		return set_err( "character set empty!: @2", p, cs )
-	#_______________________
+      func  get_0( p, pp, c ,cp,cs,h,l ) {
 
-	_CHARSET[ s = length( _CHARSET ) ][ "" ]
-	_CHARSET[ d = length( _CHARSET ) ][ "" ]
+            cp = _COUNTPTR[ p ]
 
-	for ( h = 1; h in C; h++ ) {
+            cs = _CHARSETL[ p ]
+            
+            h = _COUNTH[ cp ]
 
-		ph = _CHARSET[ s ][ ph ] = C[ h ]
+            if ( "" == l = _CHARSET[ cs ][ _COUNTL[ cp ] ] ) {
+                  
+                  l = _CHARSET[ cs ][ "" ]
 
-		for ( c = 1; c in C; c++ )
+                  cs = _CHARSETH[ p ]
 
-			pc = _CHARSET[ d ][ pc ] = ph C[ c ] }
-	#_______________________
+                  if ( "" == h = _CHARSET[ cs ][ h ] ) {
 
-	_PREFIX[ p ] = px
-	_SUFFIX[ p ] = sx
+                        h = _CHARSET[ cs ][ "" ]
 
-	set_0( p, p, l, d, s )
+                        if ( cp in _NEXT )
 
-	return p }
+                              _HIPFX[ cp ] = get_0( _NEXT[ cp ], pp, 1 )
 
-	#_____________________________
+                        else  return get_err( "chain @2: out! of uid range", pp, c ) }
 
-	func	set_0( pp, p, l, d, s ,cs ) {
+                  _COUNTH[ cp ] = h }
 
-		_COUNTPTR[ p ] = p
+            _COUNTL[ cp ] = l
 
-		if ( l > 1 )
+            return _HIPFX[ cp ] h l }
+      #_____________________________
 
-			_CHARSETL[ p ] = d
+      func  get_err( t, p, c, p3,p4 ) {
 
-		if ( l < 3 )
+            return fatal( "uid::get( @1 ): " t, p, c, p3,p4 ) }
 
-			_CHARSETH[ p ] = 0
+#_________________________________________________________________
+func  set( p, px, sx, l, cs ,s,d,h,ph,c,pc,C ) { #################
 
-		switch ( l ) {
+      # setup independent uid-generator
+      #
+      #     p           - pointer to uid-generator
+      #     px          - prefix of uid-generator
+      #     sx          - suffix of uid-generator
+      #     l           - length of generated uid part
+      #     cs          - character set of generated uid part ( []-regexp )
+      #_____________________________
 
-			case 1:
+      if ( init0_f ) {
 
-				_CHARSETL[ p ] = s
+            if ( p == "" && l > 4 )
 
-			case 2:
+                  return set_err( "default uid-generator: length > 4 is not allowed!", p ) }
 
-				_COUNTH[ p ] = ""
+      else {
 
-				break
+            if ( ! ( "" in _COUNTPTR ) )
 
-			case 3:
+                  init0()
 
-				cs = _CHARSETH[ p ] = s
+            if ( p == "" )
 
-				_COUNTH[ p ] = _CHARSET[ cs ][ "" ]
+                  return set_err( "default uid-generator can't be redefined!", p )
 
-				break
+            if ( p == "hid" )
 
-			default:
+                  return set_err( "hid-generator can't be redefined!", p ) }
+      #_______________________
 
-				cs = _CHARSETH[ p ] = d
+      if ( l == "" )
 
-				_COUNTH[ p ] = _CHARSET[ cs ][ "" ]
+            l = 4
 
-				if ( 0 < l -= 4 )
+      if ( l < 1 )
 
-					_HIPFX[ p ] = set_0( pp, _NEXT[ p ] = uid::get(), l, d, s ) }
+            return set_err( "generative part length! < 1", p )
+      #_________________
 
-		if ( p == pp )
+      if ( cs == "" )
 
-			return _COUNTL[ p ] = ""
+            cs = "\xC0-\xEF"
 
-		_COUNTL[ p ] = _CHARSET[ _CHARSETL[ p ] ][ "" ]
+      if ( ! awk::patsplit( _ALLCHAR_, C, "[" cs "]" ) )
 
-		return _HIPFX[ p ] _COUNTH[ p ] _COUNTL[ p ] }
+            return set_err( "character set empty!: @2", p, cs )
+      #_______________________
 
-	#_____________________________
+      _CHARSET[ s = length( _CHARSET ) ][ "" ]
+      _CHARSET[ d = length( _CHARSET ) ][ "" ]
 
-	func	set_err( t, p, p2,p3,p4 ) {
+      for ( h = 1; h in C; h++ ) {
 
-		return fatal( "uid::set( @1 ): " t, p, p2,p3,p4 ) }
+            ph = _CHARSET[ s ][ ph ] = C[ h ]
+
+            for ( c = 1; c in C; c++ )
+
+                  pc = _CHARSET[ d ][ pc ] = ph C[ c ] }
+      #_______________________
+
+      _PREFIX[ p ] = px
+      _SUFFIX[ p ] = sx
+
+      set_0( p, p, l, d, s )
+
+      return p }
+
+      #_____________________________
+
+      func  set_0( pp, p, l, d, s ,cs ) {
+
+            _COUNTPTR[ p ] = p
+
+            if ( l > 1 )
+
+                  _CHARSETL[ p ] = d
+
+            if ( l < 3 )
+
+                  _CHARSETH[ p ] = 0
+
+            switch ( l ) {
+
+                  case 1:
+
+                        _CHARSETL[ p ] = s
+
+                  case 2:
+
+                        _COUNTH[ p ] = ""
+
+                        break
+
+                  case 3:
+
+                        cs = _CHARSETH[ p ] = s
+
+                        _COUNTH[ p ] = _CHARSET[ cs ][ "" ]
+
+                        break
+
+                  default:
+
+                        cs = _CHARSETH[ p ] = d
+
+                        _COUNTH[ p ] = _CHARSET[ cs ][ "" ]
+
+                        if ( 0 < l -= 4 )
+
+                              _HIPFX[ p ] = set_0( pp, _NEXT[ p ] = uid::get(), l, d, s ) }
+
+            if ( p == pp )
+
+                  return _COUNTL[ p ] = ""
+
+            _COUNTL[ p ] = _CHARSET[ _CHARSETL[ p ] ][ "" ]
+
+            return _HIPFX[ p ] _COUNTH[ p ] _COUNTL[ p ] }
+
+      #_____________________________
+
+      func  set_err( t, p, p2,p3,p4 ) {
+
+            return fatal( "uid::set( @1 ): " t, p, p2,p3,p4 ) }
 
 #___________________________________________________________
-func	setcs( p, px, sx, pp ) { #############################
+func  setcs( p, px, sx, pp ) { #############################
 
-	# setup uid-generator using remoted character set
-	# and character set length from another uid-generator
-	#
-	#	the uid-generator `p will have identical uid-generated part as its specified for
-	#	another uid-generated `pp
-	#
-	#		p		- pointer to initialized uid-generator
-	#		px		- prefix string
-	#		sx		- suffix string
-	#		pp		- pointer to uid-generator that's character set (and it's length) will be used
-	#_____________________________
+      # setup uid-generator using remoted character set
+      # and character set length from another uid-generator
+      #
+      #     the uid-generator `p will have identical uid-generated part as its specified for
+      #     another uid-generated `pp
+      #
+      #           p           - pointer to initialized uid-generator
+      #           px          - prefix string
+      #           sx          - suffix string
+      #           pp          - pointer to uid-generator that's character set (and it's length) will be used
+      #_____________________________
 
-	if ( ! init0_f ) {
+      if ( ! init0_f ) {
 
-		if ( ! ( "" in _COUNTPTR ) )
+            if ( ! ( "" in _COUNTPTR ) )
 
-			init0()
+                  init0()
 
-		if ( p == "" )
+            if ( p == "" )
 
-			return setcs_err( "default uid-generator can't be redefined!", p )
+                  return setcs_err( "default uid-generator can't be redefined!", p )
 
-		else	if ( p == "hid" )
+            else  if ( p == "hid" )
 
-				return setcs_err( "hid-generator can't be redefined!", p ) }
-	#_______________________
+                        return setcs_err( "hid-generator can't be redefined!", p ) }
+      #_______________________
 
-	if ( ! ( pp in _COUNTPTR ) )
+      if ( ! ( pp in _COUNTPTR ) )
 
-		return setcs_err( "undefined! parent uid-generator: @2", p, pp )
+            return setcs_err( "undefined! parent uid-generator: @2", p, pp )
 
-	setcs_0( p, p, pp )
+      setcs_0( p, p, pp )
 
-	_PREFIX[ p ] = px
-	_SUFFIX[ p ] = sx
+      _PREFIX[ p ] = px
+      _SUFFIX[ p ] = sx
 
-	return p }
+      return p }
 
-	#_____________________________
+      #_____________________________
 
-	func	setcs_0( pp, p, bp ) {
+      func  setcs_0( pp, p, bp ) {
 
-		_COUNTPTR[ p ] = p
+            _COUNTPTR[ p ] = p
 
-		_CHARSETL[ p ] = _CHARSETL[ bp ]
-		_CHARSETH[ p ] = _CHARSETH[ bp ]
+            _CHARSETL[ p ] = _CHARSETL[ bp ]
+            _CHARSETH[ p ] = _CHARSETH[ bp ]
 
-		_COUNTH[ p ] = _CHARSET[ _CHARSETH[ p ] ][ "" ]
+            _COUNTH[ p ] = _CHARSET[ _CHARSETH[ p ] ][ "" ]
 
-		if ( bp in _NEXT )
+            if ( bp in _NEXT )
 
-			_HIPFX[ p ] = setcs_0( pp, _NEXT[ p ] = uid::get(), _NEXT[ bp ] )
+                  _HIPFX[ p ] = setcs_0( pp, _NEXT[ p ] = uid::get(), _NEXT[ bp ] )
 
-		if ( p == pp )
+            if ( p == pp )
 
-			_COUNTL[ p ] = ""
+                  _COUNTL[ p ] = ""
 
-		else {
+            else {
 
-			_COUNTL[ p ] = _CHARSET[ _CHARSETL[ p ] ][ "" ]
+                  _COUNTL[ p ] = _CHARSET[ _CHARSETL[ p ] ][ "" ]
 
-			return _HIPFX[ p ] _COUNTH[ p ] _COUNTL[ p ] } }
+                  return _HIPFX[ p ] _COUNTH[ p ] _COUNTL[ p ] } }
 
-	#_____________________________
+      #_____________________________
 
-	func	setcs_err( t, p, p2,p3,p4 ) {
+      func  setcs_err( t, p, p2,p3,p4 ) {
 
-		return fatal( "uid::setcs( @1 ): " t, p, p2,p3,p4 ) }
+            return fatal( "uid::setcs( @1 ): " t, p, p2,p3,p4 ) }
 
 #___________________________________________________________
-func	setcnt( p, px, sx, pp ) { ############################
+func  setcnt( p, px, sx, pp ) { ############################
 
-	# setup uid-generator using shared charset and counters
-	# with it's own prefix and suffix
-	#
-	#	the uid-generator `p will have the same uid-generated part as its specified for
-	#	`pp but with it's own prefix and suffix
-	#
-	#		p		- pointer to initialized uid-generator
-	#		px		- prefix string
-	#		sx		- suffix string
-	#		pp		- pointer to uid-generator that's uid-gnerator will; be used
-	#_____________________________
+      # setup uid-generator using shared charset and counters
+      # with it's own prefix and suffix
+      #
+      #     the uid-generator `p will have the same uid-generated part as its specified for
+      #     `pp but with it's own prefix and suffix
+      #
+      #           p           - pointer to initialized uid-generator
+      #           px          - prefix string
+      #           sx          - suffix string
+      #           pp          - pointer to uid-generator that's uid-gnerator will; be used
+      #_____________________________
 
-	if ( ! init0_f ) {
+      if ( ! init0_f ) {
 
-		if ( ! ( "" in _COUNTPTR ) )
+            if ( ! ( "" in _COUNTPTR ) )
 
-			init0()
+                  init0()
 
-		if ( p == "" )
+            if ( p == "" )
 
-			return setcnt_err( "default uid-generator can't be redefined!", p )
+                  return setcnt_err( "default uid-generator can't be redefined!", p )
 
-		else	if ( p == "hid" )
+            else  if ( p == "hid" )
 
-				return setcnt_err( "hid-generator can't be redefined!", p ) }
-	#_______________________
+                        return setcnt_err( "hid-generator can't be redefined!", p ) }
+      #_______________________
 
-	if ( ! ( pp in _COUNTPTR ) )
+      if ( ! ( pp in _COUNTPTR ) )
 
-		return setcnt_err( "undefined! parent uid-generator: @2", p, pp )
+            return setcnt_err( "undefined! parent uid-generator: @2", p, pp )
 
-	_COUNTPTR[ p ] = _COUNTPTR[ pp ]
+      _COUNTPTR[ p ] = _COUNTPTR[ pp ]
 
-	_CHARSETL[ p ] = _CHARSETL[ pp ]
-	_CHARSETH[ p ] = _CHARSETH[ pp ]
+      _CHARSETL[ p ] = _CHARSETL[ pp ]
+      _CHARSETH[ p ] = _CHARSETH[ pp ]
 
-	_PREFIX[ p ] = px
-	_SUFFIX[ p ] = sx
+      _PREFIX[ p ] = px
+      _SUFFIX[ p ] = sx
 
-	return p }
+      return p }
 
-	#_____________________________
+      #_____________________________
 
-	func	setcnt_err( t, p, p2,p3,p4 ) {
+      func  setcnt_err( t, p, p2,p3,p4 ) {
 
-		return fatal( "uid::setcnt( @1 ): " t, p, p2,p3,p4 ) }
+            return fatal( "uid::setcnt( @1 ): " t, p, p2,p3,p4 ) }
 
 #_________________________________________________________________
-func	fatal( t, p1,p2,p3,p4 ,e ) { ###############################
+func  fatal( t, p1,p2,p3,p4 ,e ) { ###############################
 
-	t = "fatal: " message( t, p1,p2,p3,p4 )
+      t = "fatal: " message( t, p1,p2,p3,p4 )
 
-	e = "/dev/stderr"
+      e = "/dev/stderr"
 
-	print t > e
+      print t > e
 
-	fflush( e )
+      fflush( e )
 
-	exit }
+      exit }
 
 #___________________________________________________________
-func	message( t, p1,p2,p3,p4 ) { ##########################
+func  message( t, p1,p2,p3,p4 ) { ##########################
 
-	gsub( /@1/, p1, t )
-	gsub( /@2/, p2, t )
-	gsub( /@3/, p3, t )
-	gsub( /@4/, p4, t )
+      gsub( /@1/, p1, t )
+      gsub( /@2/, p2, t )
+      gsub( /@3/, p3, t )
+      gsub( /@4/, p4, t )
 
-	gsub( /!/, "", t )
+      gsub( /!/, "", t )
 
-	return t }
+      return t }
 
 
 #_______________________________________________________________________
 # HID v1.0 ( 2024.10.7 ) ###############################################
 #
-#	by digi_cs 2024
+#     by digi_cs 2024
 #
-#	- dynamic initialization
+#     - dynamic initialization
 #
-#	- global and local hids definition
+#     - global and local hids definition
 #
 #_______________________________________________
 #
-#	funcset:
+#     funcset:
 #
-#		hid::get
+#           hid::get
 #
-#		hid::name
+#           hid::name
 #
-#		hid::namespace
+#           hid::namespace
 #
-#	arrayset:
+#     arrayset:
 #
-#		HID
+#           HID
 #
 #_________________________________________________________________
-func	envmod::hid( C ) { #########################################
+func  envmod::hid( C ) { #########################################
 
-	# environment registration: hid
-	#
-	#_____________________________
+      # environment registration: hid
+      #
+      #_____________________________
 
-	C[ "rq" ]		= "uid"
+      C[ "rq" ]         = "uid"
 
 }#________________________________________________________________
 ##################################################################
@@ -470,118 +471,118 @@ func	envmod::hid( C ) { #########################################
 @namespace "hid"
 
 #_________________________________________________________________
-func	get( n, c ,A ) { ###########################################
+func  get( n, c ,A ) { ###########################################
 
-	# define hid
-	#
-	#	n		- defined hid name
-	#
-	#	c		- code ( if == "" then code by hid-generator )
-	#
-	#	if n == "" then generate and return new hid code
-	#	if n do not contain namespace prefix then global hid definition
-	#	if n contains namespace prefix then local hid definition (named)
-	#	if n contains namespace prefix but the namespace is empty then
-	#		local hid definition using globvar _NAMESPACE_ containing
-	#		last namespace specified for function
-	#
-	#	the namespace prefix is '::' or '.'
-	#
-	#	HID[ code ]
-	#
-	#	_CODENAME[ code ] = name
-	#	_NAMECODE[ name ] = code
-	#	_NAMESPACE[ code ] = namespace	( only for local hids )
-	#_____________________________
+      # define hid
+      #
+      #     n           - defined hid name
+      #
+      #     c           - code ( if == "" then code by hid-generator )
+      #
+      #     if n == "" then generate and return new hid code
+      #     if n do not contain namespace prefix then global hid definition
+      #     if n contains namespace prefix then local hid definition (named)
+      #     if n contains namespace prefix but the namespace is empty then
+      #           local hid definition using globvar _NAMESPACE_ containing
+      #           last namespace specified for function
+      #
+      #     the namespace prefix is '::' or '.'
+      #
+      #     HID[ code ]
+      #
+      #     _CODENAME[ code ] = name
+      #     _NAMECODE[ name ] = code
+      #     _NAMESPACE[ code ] = namespace      ( only for local hids )
+      #_____________________________
 
-	uid::init0()
+      uid::init0()
 
-	gsub( /[\x09\x0A\x0D\x20\xA0]+/, "", n )
+      gsub( /[\x09\x0A\x0D\x20\xA0]+/, "", n )
 
-	match( n, /^(([^:]*)(::|\.))?(.*)$/, A )
+      match( n, /^(([^:]*)(::|\.))?(.*)$/, A )
 
-	if ( A[ 2 ] != "" )
+      if ( A[ 2 ] != "" )
 
-		_NAMESPACE_ = A[ 2 ]
+            _NAMESPACE_ = A[ 2 ]
 
-	if ( "" == n = A[ 4 ] )
+      if ( "" == n = A[ 4 ] )
 
-		return gethid( c )
+            return gethid( c )
 
-	if ( 1 in A )
+      if ( 1 in A )
 
-		n = _NAMESPACE_ "::" n
+            n = _NAMESPACE_ "::" n
 
-	if ( n in _NAMECODE )
+      if ( n in _NAMECODE )
 
-		return _NAMECODE[ n ]
+            return _NAMECODE[ n ]
 
-	HID[ c = gethid( c ) ]
+      HID[ c = gethid( c ) ]
 
-	if ( 1 in A )
+      if ( 1 in A )
 
-		_NAMESPACE[ c ] = _NAMESPACE_
+            _NAMESPACE[ c ] = _NAMESPACE_
 
-	_CODENAME[ c ] = n
-	_NAMECODE[ n ] = c
+      _CODENAME[ c ] = n
+      _NAMECODE[ n ] = c
 
-	return c }
-	#_____________________________
+      return c }
+      #_____________________________
 
-	func	gethid( c ) {
+      func  gethid( c ) {
 
-		if ( c == "" )
+            if ( c == "" )
 
-			return uid::get( "hid" )
+                  return uid::get( "hid" )
 
-		return c }
-
-#___________________________________________________________
-func	name( c ,n ) { #######################################
-
-	# return name of hid by code
-	#_____________________________
-
-	uid::init0()
-
-	if ( c in _CODENAME )
-
-		return _CODENAME[ c ] }
+            return c }
 
 #___________________________________________________________
-func	namespace( c ) { #####################################
+func  name( c ,n ) { #######################################
 
-	# return namespace of the given hid code
-	#
-	#	c		- hid code
-	#
-	#			if c is not hid code then return null
-	#
-	#			if hid is global then return ""
-	#
-	#			if hid is local then return namespace of hid
-	#
-	#_____________________________
+      # return name of hid by code
+      #_____________________________
 
-	uid::init0()
+      uid::init0()
 
-	if ( c in _NAMESPACE )
+      if ( c in _CODENAME )
 
-		return _NAMESPACE[ c ]
-
-	if ( c in _CODENAME )
-
-			return "" }
+            return _CODENAME[ c ] }
 
 #___________________________________________________________
-func	dump::hid( h ) { #####################################
+func  namespace( c ) { #####################################
 
-	# return dump of hid
-	#
-	#_____________________________
+      # return namespace of the given hid code
+      #
+      #     c           - hid code
+      #
+      #                 if c is not hid code then return null
+      #
+      #                 if hid is global then return ""
+      #
+      #                 if hid is local then return namespace of hid
+      #
+      #_____________________________
+
+      uid::init0()
+
+      if ( c in _NAMESPACE )
+
+            return _NAMESPACE[ c ]
+
+      if ( c in _CODENAME )
+
+                  return "" }
+
+#___________________________________________________________
+func  dump::hid( h ) { #####################################
+
+      # return dump of hid
+      #
+      #_____________________________
 
 
-	}
+      }
 
 #_______________________________________________________________________
 ########################################################################
