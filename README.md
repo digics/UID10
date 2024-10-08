@@ -49,8 +49,3 @@ Denis Shirokov (digi_cs)
 *Github*:
 
     https://github.com/digics/UID10
-<<<<<<< HEAD
-
-=======
->>>>>>> 58e74a1a19d3bcd8cf4dc20b06d3ef7208f49e7b
-
