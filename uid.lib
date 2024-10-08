@@ -32,17 +32,25 @@
 #		dump::hid (n/a)
 #
 #_________________________________________________________________
-func	envmod::uid( C ) { } #######################################
+func	envmod::uid( C ) { #########################################
 
-	@namespace	 "uid"
+	# environment registration: uid
+	#
+	#_____________________________
+
+
+}#________________________________________________________________
+##################################################################
+
+@namespace	 "uid"
 
 #_________________________________________________________________
 BEGIN{ ###########################################################
 
-	uid::init0() }
+	init0() }
 
 #_________________________________________________________________
-func	uid::init0(	 c ) { #########################################
+func	init0(  c ) { ##############################################
 
 	if ( ! ( "" in _COUNTPTR ) ) {
 
@@ -57,14 +65,17 @@ func	uid::init0(	 c ) { #########################################
 
 		init0_f = 1
 
-			uid::set( "", "\x7F", "\xC0\xC0\xFF" )
+			set( "", "\x7F", "\xC0\xC0\xFF" )
 
-			uid::setcs( "hid", "\xFE", "\xC0\xC0\xFE" )
+			setcs( "hid", "\xFE", "\xC0\xC0\xFE" )
 
-		init0_f = 0 } }
+		init0_f = 0
+		#_______________________
+
+		_NAMESPACE_ = "awk" } }
 
 #_________________________________________________________________
-func	uid::get( p ,cp,cs,h,l ) { #################################
+func	get( p ,cp,cs,h,l ) { ######################################
 
 	# generate uid by uid-generator
 	#
@@ -74,7 +85,7 @@ func	uid::get( p ,cp,cs,h,l ) { #################################
 
 	if ( ! ( "" in _COUNTPTR ) )
 
-		uid::init0()
+		init0()
 
 	if ( ! ( p in _COUNTPTR ) )
 
@@ -146,7 +157,7 @@ func	uid::get( p ,cp,cs,h,l ) { #################################
 		return fatal( "uid::get( @1 ): " t, p, c, p3,p4 ) }
 
 #_________________________________________________________________
-func	uid::set( p, px, sx, l, cs ,s,d,h,ph,c,pc,C ) { ############
+func	set( p, px, sx, l, cs ,s,d,h,ph,c,pc,C ) { #################
 
 	# setup independent uid-generator
 	#
@@ -167,7 +178,7 @@ func	uid::set( p, px, sx, l, cs ,s,d,h,ph,c,pc,C ) { ############
 
 		if ( ! ( "" in _COUNTPTR ) )
 
-			uid::init0()
+			init0()
 
 		if ( p == "" )
 
@@ -175,7 +186,7 @@ func	uid::set( p, px, sx, l, cs ,s,d,h,ph,c,pc,C ) { ############
 
 		if ( p == "hid" )
 
-			return set_err( "hid generator can't be redefined!", p ) }
+			return set_err( "hid-generator can't be redefined!", p ) }
 	#_______________________
 
 	if ( l == "" )
@@ -274,7 +285,7 @@ func	uid::set( p, px, sx, l, cs ,s,d,h,ph,c,pc,C ) { ############
 		return fatal( "uid::set( @1 ): " t, p, p2,p3,p4 ) }
 
 #___________________________________________________________
-func	uid::setcs( p, px, sx, pp ) { ########################
+func	setcs( p, px, sx, pp ) { #############################
 
 	# setup uid-generator using remoted character set
 	# and character set length from another uid-generator
@@ -292,7 +303,7 @@ func	uid::setcs( p, px, sx, pp ) { ########################
 
 		if ( ! ( "" in _COUNTPTR ) )
 
-			uid::init0()
+			init0()
 
 		if ( p == "" )
 
@@ -300,7 +311,7 @@ func	uid::setcs( p, px, sx, pp ) { ########################
 
 		else	if ( p == "hid" )
 
-				return setcs_err( "hid generator can't be redefined!", p ) }
+				return setcs_err( "hid-generator can't be redefined!", p ) }
 	#_______________________
 
 	if ( ! ( pp in _COUNTPTR ) )
@@ -346,7 +357,7 @@ func	uid::setcs( p, px, sx, pp ) { ########################
 		return fatal( "uid::setcs( @1 ): " t, p, p2,p3,p4 ) }
 
 #___________________________________________________________
-func	uid::setcnt( p, px, sx, pp ) { #######################
+func	setcnt( p, px, sx, pp ) { ############################
 
 	# setup uid-generator using shared charset and counters
 	# with it's own prefix and suffix
@@ -364,7 +375,7 @@ func	uid::setcnt( p, px, sx, pp ) { #######################
 
 		if ( ! ( "" in _COUNTPTR ) )
 
-			uid::init0()
+			init0()
 
 		if ( p == "" )
 
@@ -372,7 +383,7 @@ func	uid::setcnt( p, px, sx, pp ) { #######################
 
 		else	if ( p == "hid" )
 
-				return setcnt_err( "hid generator can't be redefined!", p ) }
+				return setcnt_err( "hid-generator can't be redefined!", p ) }
 	#_______________________
 
 	if ( ! ( pp in _COUNTPTR ) )
@@ -447,32 +458,40 @@ func	message( t, p1,p2,p3,p4 ) { ##########################
 #_________________________________________________________________
 func	envmod::hid( C ) { #########################################
 
+	# environment registration: hid
+	#
+	#_____________________________
+
 	C[ "rq" ]		= "uid"
 
 }#________________________________________________________________
 ##################################################################
 
-	@namespace "hid"
+@namespace "hid"
 
 #_________________________________________________________________
-func	hid::get( n, c ,A ) { ######################################
+func	get( n, c ,A ) { ###########################################
 
 	# define hid
 	#
 	#	n		- defined hid name
 	#
-	#	if n == "" then generate and return new hid value
+	#	c		- code ( if == "" then code by hid-generator )
+	#
+	#	if n == "" then generate and return new hid code
 	#	if n do not contain namespace prefix then global hid definition
 	#	if n contains namespace prefix then local hid definition (named)
-	#	if n contains namespace prefix but the namespace is empty then local hid definition (unnamed)
+	#	if n contains namespace prefix but the namespace is empty then
+	#		local hid definition using globvar _NAMESPACE_ containing
+	#		last namespace specified for function
 	#
 	#	the namespace prefix is '::' or '.'
 	#
-	#	HID[ value ]
+	#	HID[ code ]
 	#
-	#	_CODENAME[ value ] = name		( except local hids == "" )
-	#	_NAMECODE[ name ] = value		( not for local until hid::namescan not performed )
-	#	_NAMESPACE[ value ] = namespace	( only for local hids )
+	#	_CODENAME[ code ] = name
+	#	_NAMECODE[ name ] = code
+	#	_NAMESPACE[ code ] = namespace	( only for local hids )
 	#_____________________________
 
 	uid::init0()
@@ -518,9 +537,9 @@ func	hid::get( n, c ,A ) { ######################################
 		return c }
 
 #___________________________________________________________
-func	hid::name( c ,n ) { ##################################
+func	name( c ,n ) { #######################################
 
-	# return name of hid by value
+	# return name of hid by code
 	#_____________________________
 
 	uid::init0()
@@ -530,13 +549,13 @@ func	hid::name( c ,n ) { ##################################
 		return _CODENAME[ c ] }
 
 #___________________________________________________________
-func	hid::namespace( c ) { ################################
+func	namespace( c ) { #####################################
 
 	# return namespace of the given hid code
 	#
 	#	c		- hid code
 	#
-	#			if c is not hid code ...
+	#			if c is not hid code then return null
 	#
 	#			if hid is global then return ""
 	#
@@ -559,9 +578,6 @@ func	dump::hid( h ) { #####################################
 
 	# return dump of hid
 	#
-	#	function requires library 
-
-	
 	#_____________________________
 
 
