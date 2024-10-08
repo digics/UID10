@@ -7,11 +7,9 @@ Public
 
 uid v1.0 + hid 1.0
 
-uid v1.0 is a library 
+uid v1.0 is the user level awk library that is able to generate unique string with cotrolled structure
 
-hid v1.0
-
-...
+hid v1.0 is the part of the uid v1.0 library. it's able to operate with the "strong vslues" 
 
 
 
@@ -50,6 +48,6 @@ Denis Shirokov (digi_cs)
 
 *Github*:
 
-    https://github.com/digics/gawklib/tree/main
+    https://github.com/digics/UID10
 
 
