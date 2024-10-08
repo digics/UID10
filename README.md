@@ -50,6 +50,5 @@ Denis Shirokov (digi_cs)
 
 *Github*:
 
-    https://github.com/digics/gawklib/tree/main
-
+    https://github.com/digics/UID10
 
