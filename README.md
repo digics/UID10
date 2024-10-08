@@ -9,7 +9,7 @@ uid v1.0 + hid 1.0
 
 uid v1.0 is the user level awk library that is able to generate unique string with cotrolled structure
 
-hid v1.0 is the part of the uid v1.0 library. it's able to operate with the "strong vslues" 
+hid v1.0 is the part of the uid v1.0 library. it's able to operate with the "strong values" 
 
 
 
