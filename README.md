@@ -1,15 +1,9 @@
-﻿## Intended Recipients
-Public
-
-
-
+﻿
 ## Summary
 
-uid v1.0 + hid 1.0
+uid is the user level awk library that is able to generate unique string with cotrolled structure
 
-uid v1.0 is the user level awk library that is able to generate unique string with cotrolled structure
-
-hid v1.0 is the part of the uid v1.0 library. it's able to operate with the "strong values" 
+hid is the part of the uid v1.0 library. it's able to operate with the "strong values" 
 
 For those who write long programs in AWK, pointers and working with strong values are essential.
 I recommend the UID library.
@@ -26,9 +20,9 @@ Library have automatic dynamic initialization so the place of including doesn't 
 
 ## Extra
 
-File 'uid100_en.pdf' contains english documentation about this library.
+File 'uid_en.pdf' contains english documentation about this library.
 
-File 'uid100_ru.pdf' contains russian documentation about this library.
+File 'uid_ru.pdf' contains russian documentation about this library.
 
 
 ## Signature
