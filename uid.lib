@@ -142,7 +142,7 @@ func  get( p ,cp,cs,h,l ) { ######################################
 
                         if ( cp in _NEXT )
 
-                              _HIPFX[ cp ] = get_0( _NEXT[ cp ], pp, 1 )
+                              _HIPFX[ cp ] = get_0( _NEXT[ cp ], pp, c + 1 )
 
                         else  return get_err( "chain @2: out! of uid range", pp, c ) }
 
@@ -423,14 +423,36 @@ func  fatal( t, p1,p2,p3,p4 ,e ) { ###############################
 #___________________________________________________________
 func  message( t, p1,p2,p3,p4 ) { ##########################
 
-      gsub( /@1/, p1, t )
-      gsub( /@2/, p2, t )
-      gsub( /@3/, p3, t )
-      gsub( /@4/, p4, t )
+      gsub( /@1/, msg_0( p1 ), t )
+      gsub( /@2/, msg_0( p2 ), t )
+      gsub( /@3/, msg_0( p3 ), t )
+      gsub( /@4/, msg_0( p4 ), t )
 
       gsub( /!/, "", t )
 
       return t }
+      #_____________________________
+
+      func  msg_0( p ) {
+
+            switch ( awk::typeof( p ) ) {
+
+                  case "untyped":
+
+                        return "-"
+
+                  case "array":
+
+                        return "A[]"
+
+                  case "undefined":
+
+                        return "-"
+
+                  default:
+
+                        return p "" } }
+
 
 
 #_______________________________________________________________________
