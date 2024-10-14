@@ -1,5 +1,4 @@
-﻿
-## Summary
+﻿## Summary
 
 AWK User-Level library for generating unique pointers
 
