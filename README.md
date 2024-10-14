@@ -1,13 +1,10 @@
 ﻿
 ## Summary
 
-uid is the user level awk library that is able to generate unique string with cotrolled structure
+AWK User-Level library for generating unique pointers
 
-hid is the part of the uid library. it's able to operate with the "strong values" 
 
-For those who write long programs in AWK, pointers and working with strong values are essential.
 
-I recommend the UID library.
 
 
 ## How to use
