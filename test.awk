@@ -1,7 +1,7 @@
 
 
 
-# PLEASE UPDATE FILES FROM MY REPOSIYORY AT: github.com/digics
+# PLEASE UPDATE FILES FROM MY REPOSIYORY AT: github.com/digics/UID10
 
 @include "uid.lib"
 
