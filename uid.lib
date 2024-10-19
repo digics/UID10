@@ -6,6 +6,8 @@
 #
 #     by digi_cs 2024
 #
+#     PLEASE DOWNLOAD LATEST VERSION FROM: github.com/digics/UID10
+#
 #     - library completely "namespaced" ( uid:: )
 #
 #     - dynamic initialization
@@ -32,6 +34,11 @@
 #
 #           dump::hid (n/a)
 #
+#     varset:
+#
+#           ERR_OUT           - if true then "out of uid error" will be fatal and directed to > ERR_OUT
+#                             otherwise ERRNO will containing error message
+#
 #_________________________________________________________________
 func  envmod::uid( C ) { #########################################
 
@@ -54,6 +61,8 @@ BEGIN{ ###########################################################
 func  init0(  c ) { ##############################################
 
       if ( ! ( "" in _COUNTPTR ) ) {
+
+            ERR_OUT = "/dev/stderr"
 
             _CHARSET[ 0 ][ "" ]
 
@@ -408,17 +417,21 @@ func  setcnt( p, px, sx, pp ) { ############################
             return fatal( "uid::setcnt( @1 ): " t, p, p2,p3,p4 ) }
 
 #_________________________________________________________________
-func  fatal( t, p1,p2,p3,p4 ,e ) { ###############################
+func  fatal( t, p1,p2,p3,p4 ) { ##################################
 
-      t = "fatal: " message( t, p1,p2,p3,p4 )
+      ERRNO = message( t, p1,p2,p3,p4 )
 
-      e = "/dev/stderr"
+      if ( ERR_OUT ) {
 
-      print t > e
+            ERRNO = "fatal: " ERRNO
 
-      fflush( e )
+            print ERRNO >> ERR_OUT
 
-      exit }
+            fflush( ERR_OUT )
+            
+            exit }
+
+      ERRNO = "error: " ERRNO }
 
 #___________________________________________________________
 func  message( t, p1,p2,p3,p4 ) { ##########################
